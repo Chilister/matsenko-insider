@@ -41,6 +41,9 @@
                 <div class="card-header text-center pb-0">
                     <h6>History</h6>
                 </div>
+                <div class="card-body">
+                    Component to show all leagues match histories, all changes store in database
+                </div>
             </div>
         </div>
         <div class="col-lg-4 col-md-4 mb-md-0 mb-4">
