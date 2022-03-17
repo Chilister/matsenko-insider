@@ -27,11 +27,6 @@ class MainPage extends Component
         return view('livewire.football.main-page');
     }
 
-    public function playAllGames()
-    {
-
-    }
-
     /**
      * @return int
      */

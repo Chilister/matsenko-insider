@@ -25,9 +25,6 @@
                 </div>
                 @livewire('football.league-result', ['matchId' => $matchId])
                 <div class="card-footer">
-                    <button class="btn btn-primary btn-sm" wire:click="playAllGames">
-                        play all
-                    </button>
                     <button class="btn btn-secondary btn-sm" wire:click="playGames">
                         next week
                     </button>
