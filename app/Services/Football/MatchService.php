@@ -2,26 +2,26 @@
 
 namespace App\Services\Football;
 
-use App\Models\MatchResult;
+use App\Models\MatchSchedule;
+use App\Repositories\LeagueResult\LeagueResultRepositoryInterface;
+use App\Repositories\MatchResult\MatchResultRepositoryInterface;
+use JetBrains\PhpStorm\ArrayShape;
 
 class MatchService
 {
     /**
-     * @param int $leagueId
-     * @return int
+     * MatchService constructor.
+     * @param ScheduleService $scheduleService
+     * @param LeagueResultService $leagueResultService
+     * @param MatchResultRepositoryInterface $matchResultRepository
+     * @param LeagueResultRepositoryInterface $leagueResultRepository
      */
-    public static function generateLeagueId(int $leagueId = 0): int
-    {
-        return ++$leagueId;
-    }
-
-    /**
-     * @param int $matchId
-     * @return int
-     */
-    public static function generateMatchId(int $matchId = 0): int
-    {
-        return ++$matchId;
+    public function __construct(
+        private ScheduleService $scheduleService,
+        private LeagueResultService $leagueResultService,
+        private MatchResultRepositoryInterface $matchResultRepository,
+        private LeagueResultRepositoryInterface $leagueResultRepository
+    ) {
     }
 
     /**
@@ -33,13 +33,66 @@ class MatchService
         return random_int(0, 1000) % 7;
     }
 
+    public function getMatchId(): int
+    {
+        return $this->matchResultRepository->getLastMatchId();
+    }
+
+    public function playGames()
+    {
+        foreach ($this->scheduleService->getCurrentWeekSchedules() as $schedule) {
+            $this->playScheduleGame($schedule);
+            $this->storeLeagueResult($schedule);
+        }
+    }
 
     /**
-     * @param MatchResult $matchResult
+     * @param MatchSchedule $schedule
+     * @return void
+     */
+    private function playScheduleGame(MatchSchedule $schedule): void
+    {
+        $this->matchResultRepository->storeMatchResult([
+            'week' => $schedule->week,
+            'schedule_id' => $schedule->id,
+            'match_id' => $this->matchResultRepository->getCurrentMatchId(),
+            'league_id' => $this->matchResultRepository->getCurrentLeagueId()
+        ]);
+    }
+
+    /**
+     * @param MatchSchedule $schedule
+     * @return void
+     */
+    private function storeLeagueResult(MatchSchedule $schedule): void
+    {
+        $preparedMatchResult = $this->prepareMatchResult();
+        $lastMatch = $this->matchResultRepository->getLastMatch();
+        $isLeagueStart = $this->matchResultRepository->isLeagueStart($lastMatch->league_id);
+        $this->leagueResultRepository->storeLeagueResult(
+            $this->leagueResultService->prepareLeagueResultData(
+                $schedule->first_team_id,
+                $lastMatch->match_id,
+                $preparedMatchResult['first_team'],
+                $isLeagueStart
+            )
+        );
+        $this->leagueResultRepository->storeLeagueResult(
+            $this->leagueResultService->prepareLeagueResultData(
+                $schedule->second_team_id,
+                $lastMatch->match_id,
+                $preparedMatchResult['second_team'],
+                $isLeagueStart
+            )
+        );
+    }
+
+    /**
      * @return array[]
      */
-    public static function prepareMatchResult(MatchResult $matchResult): array
+    #[ArrayShape(['first_team' => "array", 'second_team' => "array"])] private function prepareMatchResult(): array
     {
+        $matchResult = $this->matchResultRepository->getLastMatch();
         if ($matchResult->first_team_result > $matchResult->second_team_result) {
             return [
                 'first_team' => [

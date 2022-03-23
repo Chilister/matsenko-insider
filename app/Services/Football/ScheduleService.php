@@ -4,11 +4,38 @@ namespace App\Services\Football;
 
 use App\Models\FootballTeam;
 use App\Models\MatchSchedule;
+use App\Repositories\FootballTeam\FootballTeamRepositoryInterface;
+use App\Repositories\MatchResult\MatchResultRepositoryInterface;
+use App\Repositories\MatchSchedule\MatchScheduleRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Schedule;
 use ScheduleBuilder;
 
 class ScheduleService
 {
+    public function __construct(
+        private MatchResultRepositoryInterface   $matchResultRepository,
+        private MatchScheduleRepositoryInterface $matchScheduleRepository
+    )
+    {
+    }
+
+    /**
+     * @return Collection<MatchSchedule>
+     */
+    public function getCurrentWeekSchedules(): Collection
+    {
+        $lastMatch = $this->matchResultRepository->getLastMatch();
+        if ($lastMatch === null) {
+            return $this->matchScheduleRepository->getFirstWeekSchedules();
+        }
+        if ($this->matchResultRepository->isLeagueEnds($lastMatch->league_id)) {
+            return $this->matchScheduleRepository->getFirstWeekSchedules();
+        }
+
+        return $this->matchScheduleRepository->getSchedulesByWeek(++$lastMatch->week);
+    }
+
     /**
      * @return void
      */
