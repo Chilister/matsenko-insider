@@ -2,14 +2,20 @@
 
 namespace App\Http\Livewire\Football;
 
-use App\Models\League;
+use App\Repositories\LeagueResult\LeagueResultRepositoryInterface;
 use Livewire\Component;
 
 class LeagueResult extends Component
 {
     public ?int $matchId = null;
+    private LeagueResultRepositoryInterface $leagueResultRepository;
 
     protected $listeners = ['games_played' => 'refreshLeague'];
+
+    public function boot(LeagueResultRepositoryInterface $leagueResultRepository)
+    {
+        $this->leagueResultRepository = $leagueResultRepository;
+    }
 
     public function refreshLeague($params): void
     {
@@ -19,10 +25,9 @@ class LeagueResult extends Component
     public function render()
     {
         return view('livewire.football.league-result', [
-            'leagueResults' => $this->matchId === null ? [] : League::where('match_id', $this->matchId)
-                ->orderByDesc('points')
-                ->orderByDesc('goal_difference')
-                ->get()
+            'leagueResults' => $this->matchId === null
+                ? []
+                : $this->leagueResultRepository->getOrderedLeagueByMatchId($this->matchId)
         ]);
     }
 }
