@@ -14,16 +14,16 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-            @livewire('football.week-prediction', ['matchId' => $matchId])
+            @livewire('football.week-prediction', ['matchId' => $matchId, 'week' => $week])
         </div>
     </div>
     <div class="row mb-4">
         <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
             <div class="card">
                 <div class="card-header text-center pb-0">
-                    <h6>League Table</h6>
+                    <h6>{{ $week }} Week League Table. League Number {{ $leagueId }}</h6>
                 </div>
-                @livewire('football.league-result', ['matchId' => $matchId])
+                @livewire('football.league-result', ['matchId' => $matchId, 'week' => $week, 'leagueId' => $leagueId])
                 <div class="card-footer">
                     <button class="btn btn-secondary btn-sm" wire:click="playGames">
                         next week
@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-            @livewire('football.match-result', ['matchId' => $matchId])
+            @livewire('football.match-result', ['matchId' => $matchId, 'week' => $week])
         </div>
     </div>
     <div class="row mb-4">
@@ -47,7 +47,7 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-4 mb-md-0 mb-4">
-            @livewire('football.match-schedule')
+            @livewire('football.match-schedule', ['week' => $week])
         </div>
     </div>
 </div>

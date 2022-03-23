@@ -2,22 +2,27 @@
 
 namespace App\Services\Football;
 
-use App\Models\League;
+use App\Repositories\LeagueResult\LeagueResultRepositoryInterface;
 
 class LeagueResultService
 {
+    public function __construct(
+        private LeagueResultRepositoryInterface $leagueResultRepository
+    ){
+    }
+
     /**
      * @param int $teamId
      * @param int $matchId
      * @param array $matchWinner
-     * @param bool $isLeagueEnds
+     * @param bool $isLeagueStart
      * @return array
      */
-    public static function prepareLeagueResultData(int $teamId, int $matchId, array $matchWinner, bool $isLeagueEnds = false): array
+    public function prepareLeagueResultData(int $teamId, int $matchId, array $matchWinner, bool $isLeagueStart = false): array
     {
-        $previousResult = $isLeagueEnds ? null : League::where('match_id', $matchId - 1)
-            ->where('team_id', $teamId)
-            ->first();
+        $previousResult = $isLeagueStart
+            ? null
+            : $this->leagueResultRepository->getLeagueByMatchAndTeamId($matchId - 1, $teamId);
         $resultData = [
             'team_id' => $teamId,
             'points' => (int)($previousResult?->points) + PointService::getPoints($matchWinner['action']),

@@ -6,15 +6,15 @@
         <table class="table text-center rounded">
             <tbody>
             @foreach($schedules->groupBy('week') as $weekNumber => $groupedSchedule)
+                <tr class="text-center">
+                    <td colspan="2" class="table-secondary">Week {{ $weekNumber }}</td>
+                </tr>
                 @foreach($groupedSchedule as $schedule)
                     <tr class="text-center">
                         <td>{{ $schedule->firstTeam->name }}</td>
                         <td>{{ $schedule->secondTeam->name }}</td>
                     </tr>
                 @endforeach
-                <tr class="text-center">
-                    <td colspan="2" class="table-secondary"></td>
-                </tr>
             @endforeach
             </tbody>
         </table>
