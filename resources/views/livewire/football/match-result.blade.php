@@ -1,6 +1,6 @@
 <div class="card h-100">
     <div class="card-header pb-0 text-center">
-        <h6>Match Results</h6>
+        <h6>{{ $week }} Week Match Results</h6>
     </div>
     <div class="card-body p-3">
         @if($matchResults === null)
